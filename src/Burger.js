@@ -1,8 +1,10 @@
 import React from 'react';
 import BurgerIngredient from './BurgerIngredient'
 import './Burger.css';
+import {withRouter} from 'react-router-dom'
 const burger=(props)=>{
 
+console.log("Props",props)
     let transforMedIngredients=Object.keys(props.ingredients).map(igKey=>{
         return [...Array(props.ingredients[igKey])].map((_,index)=>{
             return <BurgerIngredient key={igKey+index} type={igKey}/>
@@ -12,6 +14,7 @@ const burger=(props)=>{
     }).reduce((larr,carr)=>{
         return larr.concat(carr)
     },[])
+    
 
     if(transforMedIngredients.length===0){
         
@@ -30,4 +33,4 @@ const burger=(props)=>{
         </div>
     )
 }
-export default burger;
+export default withRouter(burger);

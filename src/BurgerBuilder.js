@@ -2,29 +2,50 @@ import React, { Component } from 'react';
  import Aux from './Aux';
  import Burger from './Burger'
  import BuildControls from './BuildControls';
-
-const INGREDIENT_PRICES={
-    salad:0.5,
-    cheese:0.4,
-    meat:1.3,
-    bacon:0.7
-}
+import OrderSummary from './OrderSummary';
+import Modal from './Modal';
+import Spinner from './Spinner'
+import {connect} from 'react-redux';
+import  * as actionTypes from './store/actions/actionType'
+import * as burgerBuilderActions from './store/actions/index'
 
  class BurgerBuilder extends Component{
 
+    
     state={
-        ingredients:{
-            salad:0,
-            bacon:0,
-            cheese:0,
-            meat:0,
-        },
-        totalPrice:4
+             
+        
+        purchase:false,
+        purchasing:false,
+        loading:false
+    }
+    componentDidMount(){
+        console.log("History",this.props)
     }
 
+    updatePurchaseState=(ingredients)=>{
+
+     
+      const sum=  Object.keys(ingredients).map(igkey=>{
+            return ingredients[igkey]
+        }).reduce((sum,el)=>{
+return sum+el;
+        },0)
+
+        return sum>0
+    }
+
+    purchaseHandler=()=>{
+        this.setState({purchasing:true})
+        
+
+    }
+
+  
 
 
      addIngredientsHandler=(type)=>{
+         console.log("dada")
          const oldCount=this.state.ingredients[type];
          const updatedCount=oldCount+ 1;
          const updatedIngredient={
@@ -32,9 +53,10 @@ const INGREDIENT_PRICES={
          }
          updatedIngredient[type]=updatedCount;
          const oldPrice=this.state.totalPrice;
-         const priceAddition=INGREDIENT_PRICES[type];
+         const priceAddition=this.props.prices[type];
          const newPrice=priceAddition + oldPrice;
          this.setState({totalPrice:newPrice,ingredients:updatedIngredient})
+         this.updatePurchaseState(updatedIngredient)
      }
       deleteIngredientsHandler=(type)=>{
 
@@ -46,32 +68,119 @@ const INGREDIENT_PRICES={
         const updatedIngredient={...this.state.ingredients}
         updatedIngredient[type]=updatedCount;
         const price=this.state.totalPrice;
-        const priceAddition=INGREDIENT_PRICES[type];
+        const priceAddition=this.props.prices[type];
 
         const newPrice=price - priceAddition;
         this.setState({totalPrice:newPrice,ingredients:updatedIngredient})
-
-
-
+        this.updatePurchaseState(updatedIngredient)
 
       }
+      cancelOrder=()=>{
+          this.setState({purchasing:false})
+      }
+      purchaseContinue=()=>{
+        //   this.setState({loading:true})
+        //   const order={
+              
+        //     ingredients:this.state.ingredients,
+        //     price:this.state.totalPrice,
+        //     customer:{
+        //         name:"Manish Kharel",
+                
+        //         address:{
+        //             zipCode:412354,
+        //             street:"Balkumari",
+        //             country:'Nepal'
+        //          },
+        //          email:"kharelmanish2@gmail.com"
+        //     },
+        //     deliveryMethod:'fastest'
+        //   }
+          
+        //     axios.post("https://myburger-f07d4.firebaseio.com//orders.json",order).then(response=>{this.setState({loading:false,purchasing:false})}).catch(err=> {this.setState({loading:false,})})
+         const queryParams=[]
+         for (let i in this.state.ingredients){
+            queryParams.push(encodeURIComponent(i)+ "=" + encodeURIComponent(this.state.ingredients[i]))
+         }
+         queryParams.push("price="+ this.state.totalPrice)
+         const queryString=queryParams.join("&")
+         console.log("Queryparams",queryString)
 
+         this.props.history.push('/checkout')
+        this.props.history.push({
+           
+            search:'?' + queryString,
+        })
+      }
+      
 
      render(){
+        console.log("History",this.props)
 
         const disabledInfo={
-            ...this.state.ingredients,
+            ...this.props.ing,
         }
 
         for(let key in disabledInfo){
             disabledInfo[key]=disabledInfo[key]<=0;
         }
+
+        
+
+       
+        let burger=<Spinner/>
+        let orderSummary=null
+
+        if(this.props.ing){
+             burger=(
+                <Aux>
+                <Burger ingredients={this.props.ing}/>
+                <BuildControls price={this.props.prices} 
+                ingredientAdded={this.props.onIngredientAdded} 
+                deletedIngredient={this.props.onIngredientRemoved} 
+                purchasable={this.updatePurchaseState(this.props.ing)}
+                disabled={disabledInfo}
+                ordered={this.purchaseHandler}
+                purchase={this.state.purchasing}
+                />
+                
+             </Aux>
+           
+            )
+            orderSummary=(
+                <OrderSummary ingredients={this.props.ing} price={this.props.prices} purchaseContinue={this.purchaseContinue} purchaseCancel={this.cancelOrder}/>
+                
+             )
+        }
+        if(this.state.loading){
+            orderSummary=<Spinner/>
+
+        }
          return(
              <Aux>
-                <Burger ingredients={this.state.ingredients}/>
-                <BuildControls price={this.state.totalPrice} ingredientAdded={this.addIngredientsHandler} deletedIngredient={this.deleteIngredientsHandler} disabled={disabledInfo}/>
-             </Aux>
+             
+             <Modal show={this.state.purchasing} cancel={this.cancelOrder}>
+              {orderSummary}
+             </Modal>
+          {burger}
+          </Aux>
+             
          )
      }
  }
- export default BurgerBuilder;
+
+const mapStateToProps=state=>{
+    return{
+    ing:state.ingredients,
+    prices:state.totalPrice
+    
+}
+}
+const mapDispatchtoProps=dispatch=>{
+    return{
+        onIngredientAdded:(name)=>dispatch(burgerBuilderActions.addIngredient(name)),
+        onIngredientRemoved:(name)=>dispatch(burgerBuilderActions.removeIngredient(name))
+    }
+}
+
+ export default connect(mapStateToProps,mapDispatchtoProps)(BurgerBuilder);
