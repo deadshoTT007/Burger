@@ -8,7 +8,8 @@ function NavigationItem(props) {
         // className={props.active? "active":null}
        <li className="NavigationItem">
            <NavLink to='/' exact activeClassName='active' >Burger Builder</NavLink>
-           <NavLink to='/orders' exact activeClassName='active' >Orders</NavLink>
+           {props.authentication? <NavLink to='/orders' exact activeClassName='active' >Orders</NavLink>:null}
+          {props.authentication?<NavLink to='/' exact activeClassName='active' >LOGOUT</NavLink>:<NavLink to='/Authenticate' exact activeClassName='active' >Authenticate</NavLink>} 
            
        </li>
     )

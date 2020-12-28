@@ -1,6 +1,6 @@
  import React,{useState} from 'react'
 import Aux from './Aux'
-
+import {connect} from 'react-redux'
 import './App.css'
 import Toolbar from './Toolbar';
 import SideDrawer from './SideDrawer'
@@ -19,12 +19,14 @@ function Layout(props) {
             }
         })
     }
+
+    console.log(props.isAuth,"ISAUTH")
     return (
        
         <>
         <Aux>
-        <Toolbar toggle={toggleHandler}/>
-        <SideDrawer show={show} close={showHandler}  />
+        <Toolbar authentication={props.isAuth} toggle={toggleHandler}/>
+        <SideDrawer authentication={props.isAuth} show={show} close={showHandler}  />
              <main  className="content"> {props.children}
              </main>
         
@@ -32,5 +34,10 @@ function Layout(props) {
         </>
     )
 }
+const mapStateToProps=state=>{
+    return{
+        isAuth:state.authReducer.token!==null
+    }
+}
 
-export default Layout;
+export default connect(mapStateToProps,null)(Layout);

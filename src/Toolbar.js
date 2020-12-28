@@ -13,7 +13,7 @@ function Toolbar(props) {
            </div>
            <Logo/>
            <nav>
-               <NavigationItems/>
+               <NavigationItems authentication={props.authentication}/>
            </nav>
 
        </header>

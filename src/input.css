@@ -1,0 +1,38 @@
+.Input{
+    width:100%;
+padding:10px;
+box-sizing: border-box;
+
+ }
+
+ .Labeal{
+     
+     text-align: left;
+     font-weight: bold;
+     display: block;
+     font: inherit;
+     width: 100% !important;
+     
+ }
+ .InputElement{
+     display: block;
+     border: 1px solid #ccc;
+     background: white;
+     outline: none;
+     padding: 6px 10px;
+     width: 100% ;
+     box-sizing: border-box;
+     border: 2px solid red;
+     /* background-color:red ; */
+ }
+ .InputElement:focus{
+     background: #ccc;
+     outline: none;
+ }
+ .InputElement .valid{
+     border:none;
+ }
+ .valid{
+     /* background-color: aqua; */
+     border: none;
+ }

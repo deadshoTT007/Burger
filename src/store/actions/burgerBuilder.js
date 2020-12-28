@@ -15,16 +15,28 @@ export const removeIngredient=(name)=>{
     }
 }
 
-export const setIngredient=(ingredient)=>{
+export const setIngredient=(ingredients)=>{
     return{
-        type:actionTypes.SET_INGREDIENT,ingredients:ingredient
+        type:actionTypes.SET_INGREDIENT,ingredients:ingredients
     }
 }
 
+export const Error=()=>{
+    return{
+        type:"Error"
+    }
+}
+
+
+
+
 export const initIngredients=()=>{
-    return dispatch=>{
+    return dispatch=>{  
+  
+dispatch(Error())
         axios.get("https://myburger-f07d4.firebaseio.com/ingredients.json").then(response=>{
             dispatch(setIngredient(response.data))
         })
+        
 }}
 

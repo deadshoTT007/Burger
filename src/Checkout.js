@@ -1,10 +1,11 @@
 import React, { Component } from 'react'
 import CheckoutSummary from './CheckoutSummary'
-import {Route} from 'react-router-dom'
+import {Route,Redirect} from 'react-router-dom'
 import ContactData from './ContactData'
+import {connect} from 'react-redux'
 // import axios from 'axios'
 
-export default class Checkout extends Component {
+ class    Checkout extends Component {
 
     
     state={
@@ -35,19 +36,35 @@ export default class Checkout extends Component {
         this.props.history.goBack()
     }
     checkoutContinueHandler=()=>{
-        // this.props.history.replace('/checkout/contact-data')
+        this.props.history.replace('/checkout/contact-data')
     }
 
     render() {
-        console.log("DATAS",this.state)
-     console.log("Querrrry",this.props)
+
+
+let summary=<Redirect to="/"/>
+if(this.props.ing){
+    summary=(
+        <div>
+                     
+                     <CheckoutSummary checkoutContinue={this.checkoutContinueHandler} checkoutCancel={this.checkoutCancelHandler} ingredients={this.state.ingredients}/>
+<Route path= '/checkout/contact-data' exact  render={(props)=><ContactData ingredients={this.state.ingredients} price={this.state.totalPrice}/>}/>
+{/* <ContactData ingredients={this.state.ingredients} totalPrice={this.state.totalPrice} /> */} 
+        </div>
+    )
+}
+       
         return (
-            <div>
-                
-                <CheckoutSummary checkoutContinue={this.checkoutContinueHandler} checkoutCancel={this.checkoutCancelHandler} ingredients={this.state.ingredients}/>
-<Route path= '/checkout/contact-data' render={(props)=>(<ContactData totalPrice={this.state.totalPrice} ingredients={this.state.ingredients}/>)}/>
-{/* <ContactData ingredients={this.state.ingredients} /> */}
-            </div>
+            summary
         )
+         
+        
     }
 }
+const mapStateToProps=state=>{
+    return{
+        ing:state.burgerBuilder.ingredients
+    }
+}
+export default connect(mapStateToProps)(Checkout);
+

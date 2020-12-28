@@ -22,9 +22,11 @@ console.log("iadaid",controls)
              added={()=>props.ingredientAdded(ctrl.type)} 
              />))}
             <button className="OrderButton" onClick={props.ordered} 
-            disabled={!props.purchasable}>ORDER NOW</button>
+            disabled={!props.purchasable}>{props.isAuthenticated?"ORDER NOW":"SIGN UP"}</button>
         </div>
     )
 }
 
 export default BuildControls
+
+

@@ -7,6 +7,7 @@ import Modal from './Modal';
 import Spinner from './Spinner'
 import {connect} from 'react-redux';
 import  * as actionTypes from './store/actions/actionType'
+import * as authAction from './store/actions/Auth' 
 import * as burgerBuilderActions from './store/actions/index'
 
  class BurgerBuilder extends Component{
@@ -17,10 +18,12 @@ import * as burgerBuilderActions from './store/actions/index'
         
         purchase:false,
         purchasing:false,
-        loading:false
+        // loading:false
+        price:this.props.prices
     }
     componentDidMount(){
         console.log("History",this.props)
+        this.props.initIngredients()
     }
 
     updatePurchaseState=(ingredients)=>{
@@ -36,8 +39,12 @@ return sum+el;
     }
 
     purchaseHandler=()=>{
+        if(this.props.token){
         this.setState({purchasing:true})
-        
+    }else{
+        this.props.onSetAuthRedirectPath("/")
+        this.props.history.push("authenticate")
+    }
 
     }
 
@@ -99,10 +106,10 @@ return sum+el;
           
         //     axios.post("https://myburger-f07d4.firebaseio.com//orders.json",order).then(response=>{this.setState({loading:false,purchasing:false})}).catch(err=> {this.setState({loading:false,})})
          const queryParams=[]
-         for (let i in this.state.ingredients){
-            queryParams.push(encodeURIComponent(i)+ "=" + encodeURIComponent(this.state.ingredients[i]))
+         for (let i in this.props.ing){
+            queryParams.push(encodeURIComponent(i)+ "=" + encodeURIComponent(this.props.ing[i]))
          }
-         queryParams.push("price="+ this.state.totalPrice)
+         queryParams.push("price="+ this.props.prices.toFixed(2))
          const queryString=queryParams.join("&")
          console.log("Queryparams",queryString)
 
@@ -139,6 +146,7 @@ return sum+el;
                 ingredientAdded={this.props.onIngredientAdded} 
                 deletedIngredient={this.props.onIngredientRemoved} 
                 purchasable={this.updatePurchaseState(this.props.ing)}
+                isAuthenticated={this.props.token}
                 disabled={disabledInfo}
                 ordered={this.purchaseHandler}
                 purchase={this.state.purchasing}
@@ -152,12 +160,13 @@ return sum+el;
                 
              )
         }
-        if(this.state.loading){
+        if(this.props.loading){
             orderSummary=<Spinner/>
 
         }
          return(
              <Aux>
+                 <div>{this.props.error}</div>
              
              <Modal show={this.state.purchasing} cancel={this.cancelOrder}>
               {orderSummary}
@@ -171,15 +180,21 @@ return sum+el;
 
 const mapStateToProps=state=>{
     return{
-    ing:state.ingredients,
-    prices:state.totalPrice
+    ing:state.burgerBuilder.ingredients,
+    prices:state.burgerBuilder.totalPrice,
+    loading:state.burgerBuilder.loading,
+    error:state.order.error,
+    token:state.authReducer.token!==null
     
 }
 }
 const mapDispatchtoProps=dispatch=>{
     return{
         onIngredientAdded:(name)=>dispatch(burgerBuilderActions.addIngredient(name)),
-        onIngredientRemoved:(name)=>dispatch(burgerBuilderActions.removeIngredient(name))
+        onIngredientRemoved:(name)=>dispatch(burgerBuilderActions.removeIngredient(name)),
+        initIngredients:()=>dispatch(burgerBuilderActions.initIngredients()),
+        onSetAuthRedirectPath:(path)=>dispatch(authAction.authRedirectPath(path))
+
     }
 }
 
